@@ -65,4 +65,4 @@ class RedisStore:
             return False
 
     async def close(self) -> None:
-        await self._redis.close()
+        await self._redis.aclose()

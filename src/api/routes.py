@@ -1,7 +1,7 @@
 """API routes — all under /api/v1."""
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 
 from src.api.dependencies import get_service
 from src.models.schemas import (
@@ -32,7 +32,7 @@ async def submit_score(
 @router.get("/leaderboard/{game_id}/top", response_model=ApiResponse[TopLeaderboardData])
 async def get_top(
     game_id: str,
-    limit: int = Query(default=10, ge=1, le=100, description="Number of top players"),
+    limit: int = Query(default=10, ge=1, le=1000, description="Number of top players"),
     service: LeaderboardService = Depends(get_service),
 ):
     """Return the top players for a game, sorted by score descending."""
@@ -53,7 +53,10 @@ async def get_user_context(
     """Return a user's rank with neighbors above and below."""
     data = await service.get_user_context(game_id, user_id, range)
     if data is None:
-        return error_response("NOT_FOUND", f"User '{user_id}' not found in game '{game_id}'")
+        raise HTTPException(
+            status_code=404,
+            detail=error_response("NOT_FOUND", f"User '{user_id}' not found in game '{game_id}'"),
+        )
     return success_response(data)
 
 
