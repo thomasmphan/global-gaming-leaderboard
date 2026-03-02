@@ -14,10 +14,8 @@ from typing import List, Optional, Tuple
 
 import redis.asyncio as aioredis
 
-from src.storage.interface import LeaderboardStorage
 
-
-class RedisStore(LeaderboardStorage):
+class RedisStore:
 
     def __init__(self, redis_url: str) -> None:
         self._redis: aioredis.Redis = aioredis.from_url(
@@ -68,7 +66,3 @@ class RedisStore(LeaderboardStorage):
 
     async def close(self) -> None:
         await self._redis.close()
-
-    @property
-    def backend_name(self) -> str:
-        return "redis"
