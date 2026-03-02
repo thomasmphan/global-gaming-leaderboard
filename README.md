@@ -2,6 +2,8 @@
 
 A production-ready REST API for managing real-time gaming leaderboards across multiple games. Built with FastAPI, Redis Sorted Sets, and PostgreSQL.
 
+See [ARCHITECTURE.md](ARCHITECTURE.md) for system design, data flow, and technical decisions.
+
 ## Features
 
 - **Submit scores** with best-score semantics (only keeps the highest)
