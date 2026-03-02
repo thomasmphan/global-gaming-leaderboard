@@ -167,6 +167,42 @@ tests/
   test_api.py          — 16 integration tests against real Redis
 ```
 
+## Deployment (DigitalOcean App Platform)
+
+The app is deployed on DigitalOcean App Platform with managed PostgreSQL and Valkey (Redis-compatible) databases.
+
+**Environment variables:**
+
+| Variable | Value |
+|----------|-------|
+| `DATABASE_URL` | `${your-postgres-cluster.DATABASE_URL}` |
+| `REDIS_URL` | `${your-valkey-cluster.DATABASE_URL}` |
+| `ALLOWED_ORIGINS` | Your domain(s), comma-separated |
+
+**Verify the deployment:**
+
+```bash
+# Replace with your app URL
+APP=https://your-app.ondigitalocean.app
+
+# Check the app is running
+curl $APP/api/v1/healthz
+
+# Check Redis and Postgres connectivity
+curl $APP/api/v1/readyz
+
+# Submit a score
+curl -X POST $APP/api/v1/scores \
+  -H "Content-Type: application/json" \
+  -d '{"user_id": "alice", "game_id": "space-invaders", "score": 9500}'
+
+# Get the leaderboard
+curl $APP/api/v1/leaderboard/space-invaders/top
+
+# Get user rank with neighbors
+curl $APP/api/v1/leaderboard/space-invaders/users/alice?range=2
+```
+
 ## Configuration
 
 | Variable | Default | Description |
