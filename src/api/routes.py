@@ -7,6 +7,7 @@ from src.api.dependencies import get_service
 from src.models.schemas import (
     ApiResponse,
     HealthData,
+    ReadyData,
     ScoreResult,
     ScoreSubmission,
     TopLeaderboardData,
@@ -62,10 +63,19 @@ async def get_user_context(
     return success_response(data)
 
 
-@router.get("/health", response_model=ApiResponse[HealthData])
-async def health_check(
+@router.get("/healthz", response_model=ApiResponse[HealthData])
+async def healthz(
     service: LeaderboardService = Depends(get_service),
 ):
-    """Health check for Redis and Postgres backends."""
-    data = await service.health_check()
+    """Liveness probe — returns 200 if the application is running."""
+    data = await service.healthz()
+    return success_response(data)
+
+
+@router.get("/readyz", response_model=ApiResponse[ReadyData])
+async def readyz(
+    service: LeaderboardService = Depends(get_service),
+):
+    """Readiness probe — pings Redis and Postgres to confirm connectivity."""
+    data = await service.readyz()
     return success_response(data)

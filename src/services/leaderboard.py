@@ -16,6 +16,7 @@ from src.models.schemas import (
     HealthData,
     LeaderboardEntry,
     NeighborSet,
+    ReadyData,
     ScoreResult,
     TopLeaderboardData,
     UserContextData,
@@ -88,12 +89,16 @@ class LeaderboardService:
             total_players=total,
         )
 
-    async def health_check(self) -> HealthData:
-        """Check storage health and return status."""
+    async def healthz(self) -> HealthData:
+        """Liveness probe — app is running."""
+        return HealthData(status="ok")
+
+    async def readyz(self) -> ReadyData:
+        """Readiness probe — check Redis and Postgres connectivity."""
         storage_health = await self._store.health_check()
-        all_healthy = all(storage_health.values())
-        return HealthData(
-            status="healthy" if all_healthy else "degraded",
-            storage=str(storage_health),
+        all_ready = all(storage_health.values())
+        return ReadyData(
+            status="ready" if all_ready else "degraded",
+            storage=storage_health,
             version=settings.api_version,
         )

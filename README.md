@@ -11,6 +11,8 @@ See [ARCHITECTURE.md](ARCHITECTURE.md) for system design, data flow, and technic
 - **User context** — a player's rank with configurable neighbors above and below
 - **Multi-game support** — separate leaderboard per game via `game_id`
 - **Cache-aside pattern** — Redis for fast reads, Postgres for durability, automatic backfill on cache miss
+- **Prometheus metrics** — `/metrics` endpoint with request count, latency histograms, and in-progress tracking
+- **Structured JSON logging** — every request logged with method, path, status, and duration
 
 ## Quick Start
 
@@ -105,11 +107,29 @@ curl http://localhost:8000/api/v1/leaderboard/space-invaders/users/alice?range=2
 }
 ```
 
-### Health Check
+### Liveness Probe
 
 ```bash
-curl http://localhost:8000/api/v1/health
+curl http://localhost:8000/api/v1/healthz
 ```
+
+Returns `{"status": "ok"}` if the app is running. No external calls.
+
+### Readiness Probe
+
+```bash
+curl http://localhost:8000/api/v1/readyz
+```
+
+Pings Redis and Postgres. Returns `{"status": "ready", "storage": {"redis": true, "postgres": true}}`.
+
+### Prometheus Metrics
+
+```bash
+curl http://localhost:8000/metrics
+```
+
+Returns Prometheus text format with `http_request_duration_seconds`, `http_requests_total`, and `http_requests_in_progress`.
 
 ## Testing
 
@@ -129,7 +149,7 @@ DATABASE_URL="" pytest -v
 
 ```
 src/
-  main.py              — FastAPI app factory, CORS, lifespan
+  main.py              — FastAPI app factory, CORS, lifespan, metrics, logging
   config.py            — Settings via pydantic-settings (.env support)
   api/
     routes.py          — REST endpoints
@@ -144,7 +164,7 @@ src/
     leaderboard_store.py — Coordinates Redis + Postgres (cache-aside)
 tests/
   conftest.py          — Fixtures (test client, Redis cleanup)
-  test_api.py          — 14 integration tests against real Redis
+  test_api.py          — 16 integration tests against real Redis
 ```
 
 ## Configuration

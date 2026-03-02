@@ -85,7 +85,11 @@ class UserContextData(BaseModel):
 
 class HealthData(BaseModel):
     status: str
-    storage: str
+
+
+class ReadyData(BaseModel):
+    status: str
+    storage: dict
     version: str
 
 

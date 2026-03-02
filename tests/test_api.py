@@ -202,12 +202,43 @@ async def test_get_user_context_last_player(client, game_id):
     assert data["neighbors"]["below"] == []
 
 
-# ── GET /health ──
+# ── GET /healthz ──
 
 
-async def test_health_check(client):
-    resp = await client.get("/api/v1/health")
+async def test_healthz(client):
+    """Liveness probe — just returns 200 if the app is running."""
+    resp = await client.get("/api/v1/healthz")
     assert resp.status_code == 200
     body = resp.json()
     assert body["success"] is True
-    assert body["data"]["status"] == "healthy"
+    assert body["data"]["status"] == "ok"
+
+
+# ── GET /readyz ──
+
+
+async def test_readyz(client):
+    """Readiness probe — pings Redis and reports storage health."""
+    resp = await client.get("/api/v1/readyz")
+    assert resp.status_code == 200
+    body = resp.json()
+    assert body["success"] is True
+    assert body["data"]["status"] == "ready"
+    assert "redis" in body["data"]["storage"]
+    assert body["data"]["version"]
+
+
+# ── GET /metrics ──
+
+
+async def test_metrics_endpoint(client):
+    """Prometheus metrics endpoint should return text with HTTP request metrics."""
+    # Make a request first so there's something to measure
+    await client.get("/api/v1/healthz")
+
+    resp = await client.get("/metrics")
+    assert resp.status_code == 200
+    assert "text/plain" in resp.headers["content-type"]
+    body = resp.text
+    assert "http_request_duration_seconds" in body
+    assert "http_requests_total" in body
