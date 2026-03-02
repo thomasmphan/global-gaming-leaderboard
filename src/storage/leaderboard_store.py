@@ -99,12 +99,26 @@ class LeaderboardStore:
         return score
 
     async def get_range(self, game_id: str, start: int, stop: int) -> List[Tuple[str, int]]:
-        """Return users in rank positions [start, stop] (0-based, inclusive)."""
-        return await self._redis.get_range(game_id, start, stop)
+        """Return users in rank positions [start, stop] (0-based, inclusive).
+
+        Falls back to Postgres on Redis miss.
+        """
+        results = await self._redis.get_range(game_id, start, stop)
+        if not results and self._postgres:
+            await self._backfill_game(game_id)
+            results = await self._redis.get_range(game_id, start, stop)
+        return results
 
     async def get_total_players(self, game_id: str) -> int:
-        """Return total number of players in a game's leaderboard."""
-        return await self._redis.get_total_players(game_id)
+        """Return total number of players in a game's leaderboard.
+
+        Falls back to Postgres on Redis miss.
+        """
+        total = await self._redis.get_total_players(game_id)
+        if total == 0 and self._postgres:
+            await self._backfill_game(game_id)
+            total = await self._redis.get_total_players(game_id)
+        return total
 
     async def health_check(self) -> dict:
         """Check health of all backends. Returns status dict."""
