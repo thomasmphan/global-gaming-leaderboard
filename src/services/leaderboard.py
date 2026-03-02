@@ -13,6 +13,8 @@ from typing import Optional
 
 from src.config import settings
 from src.models.schemas import (
+    GameListData,
+    GameSummary,
     HealthData,
     LeaderboardEntry,
     NeighborSet,
@@ -88,6 +90,12 @@ class LeaderboardService:
             neighbors=NeighborSet(above=above, below=below),
             total_players=total,
         )
+
+    async def list_games(self) -> GameListData:
+        """Return all games with their player counts."""
+        games = await self._store.get_all_games()
+        summaries = [GameSummary(**g) for g in games]
+        return GameListData(games=summaries, total_games=len(summaries))
 
     async def healthz(self) -> HealthData:
         """Liveness probe — app is running."""

@@ -120,6 +120,22 @@ class LeaderboardStore:
             total = await self._redis.get_total_players(game_id)
         return total
 
+    async def get_all_games(self) -> List[dict]:
+        """Return all games with their player counts.
+
+        Merges game IDs from Redis and Postgres (if available).
+        """
+        game_ids = set(await self._redis.get_all_game_ids())
+        if self._postgres:
+            pg_ids = await self._postgres.get_all_game_ids()
+            game_ids.update(pg_ids)
+
+        games = []
+        for game_id in sorted(game_ids):
+            total = await self._redis.get_total_players(game_id)
+            games.append({"game_id": game_id, "total_players": total})
+        return games
+
     async def health_check(self) -> dict:
         """Check health of all backends. Returns status dict."""
         redis_ok = await self._redis.health_check()

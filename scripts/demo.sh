@@ -30,7 +30,7 @@ echo "[2] Readiness probe (readyz)"
 curl -s "$API/readyz" | pretty
 pause
 
-# 2. Submit scores
+# 2. Submit scores (Un-comment to test scores submission)
 # echo "[3] Submit a score (alice, space-invaders, 9500)"
 # curl -s -X POST "$API/scores" \
 #     -H "Content-Type: application/json" \

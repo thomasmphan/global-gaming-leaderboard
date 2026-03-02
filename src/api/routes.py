@@ -6,6 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from src.api.dependencies import get_service
 from src.models.schemas import (
     ApiResponse,
+    GameListData,
     HealthData,
     ReadyData,
     ScoreResult,
@@ -28,6 +29,15 @@ async def submit_score(
     """Submit a score. Only updates if new score > existing (best-score semantics)."""
     result = await service.submit_score(body.game_id, body.user_id, body.score)
     return success_response(result)
+
+
+@router.get("/games", response_model=ApiResponse[GameListData])
+async def list_games(
+    service: LeaderboardService = Depends(get_service),
+):
+    """List all games with their player counts."""
+    data = await service.list_games()
+    return success_response(data)
 
 
 @router.get("/leaderboard/{game_id}/top", response_model=ApiResponse[TopLeaderboardData])

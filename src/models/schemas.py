@@ -83,6 +83,16 @@ class UserContextData(BaseModel):
     total_players: int
 
 
+class GameSummary(BaseModel):
+    game_id: str
+    total_players: int
+
+
+class GameListData(BaseModel):
+    games: List[GameSummary]
+    total_games: int
+
+
 class HealthData(BaseModel):
     status: str
 

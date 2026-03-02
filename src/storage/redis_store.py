@@ -58,6 +58,14 @@ class RedisStore:
         key = self._key(game_id)
         return await self._redis.zcard(key)
 
+    async def get_all_game_ids(self) -> List[str]:
+        """Return all game IDs by scanning for leaderboard:* keys."""
+        prefix = "leaderboard:"
+        game_ids = []
+        async for key in self._redis.scan_iter(match=f"{prefix}*"):
+            game_ids.append(key[len(prefix):])
+        return game_ids
+
     async def health_check(self) -> bool:
         try:
             return await self._redis.ping()

@@ -50,6 +50,28 @@ async def test_submit_score_negative_score(client, game_id):
     assert resp.status_code == 422
 
 
+# ── GET /games ──
+
+
+async def test_list_games(client, game_id):
+    """List games should include a game after submitting a score to it."""
+    await client.post("/api/v1/scores", json={
+        "user_id": "alice", "game_id": game_id, "score": 100,
+    })
+
+    resp = await client.get("/api/v1/games")
+    assert resp.status_code == 200
+    body = resp.json()
+    assert body["success"] is True
+
+    game_ids = [g["game_id"] for g in body["data"]["games"]]
+    assert game_id in game_ids
+
+    game = next(g for g in body["data"]["games"] if g["game_id"] == game_id)
+    assert game["total_players"] == 1
+    assert body["data"]["total_games"] >= 1
+
+
 # ── GET /leaderboard/{game_id}/top ──
 
 
