@@ -5,9 +5,6 @@ so tests can run in parallel without interfering with each other.
 """
 from __future__ import annotations
 
-import pytest
-
-
 # ── POST /scores ──
 
 

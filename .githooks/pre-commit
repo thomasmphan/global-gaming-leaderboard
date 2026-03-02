@@ -1,0 +1,15 @@
+#!/bin/sh
+# Pre-commit hook: run ruff linter on staged Python files.
+# To enable: git config core.hooksPath .githooks
+
+RUFF="ruff"
+if [ -f "venv/bin/ruff" ]; then
+    RUFF="venv/bin/ruff"
+fi
+
+echo "Running ruff lint check..."
+$RUFF check src/ tests/
+if [ $? -ne 0 ]; then
+    echo "Lint failed. Fix the issues above before committing."
+    exit 1
+fi

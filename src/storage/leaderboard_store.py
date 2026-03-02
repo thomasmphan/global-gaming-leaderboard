@@ -11,8 +11,8 @@ from __future__ import annotations
 import logging
 from typing import List, Optional, Tuple
 
-from src.storage.redis_store import RedisStore
 from src.storage.postgres_store import PostgresStore
+from src.storage.redis_store import RedisStore
 
 logger = logging.getLogger(__name__)
 

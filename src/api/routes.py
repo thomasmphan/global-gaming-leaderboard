@@ -6,13 +6,13 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from src.api.dependencies import get_service
 from src.models.schemas import (
     ApiResponse,
-    ScoreSubmission,
+    HealthData,
     ScoreResult,
+    ScoreSubmission,
     TopLeaderboardData,
     UserContextData,
-    HealthData,
-    success_response,
     error_response,
+    success_response,
 )
 from src.services.leaderboard import LeaderboardService
 
@@ -47,7 +47,9 @@ async def get_top(
 async def get_user_context(
     game_id: str,
     user_id: str,
-    range: int = Query(default=2, ge=0, le=10, alias="range", description="Neighbors above and below"),
+    range: int = Query(
+        default=2, ge=0, le=10, alias="range", description="Neighbors above and below"
+    ),
     service: LeaderboardService = Depends(get_service),
 ):
     """Return a user's rank with neighbors above and below."""
